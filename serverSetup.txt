@@ -32,11 +32,11 @@ $ sudo rm sites-enabled/default
 Modify the Nginx config file to enable PHP:
 $ sudo vi /etc/nginx/sites-enabled/wordpress
 
-Modify some lines:
+Modify those lines:
 - "index index.html index.htm;" -> "index index.php index.html index.htm;"
 - "try_files $uri $uri/ /index.html;" -> "try_files $uri $uri/ /index.php /index.html;"
 
-Uncomment some lines:
+Uncomment and add those lines:
     location ~ \.php$ {
             try_files $uri =404;
             fastcgi_split_path_info ^(.+\.php)(/.+)$;
@@ -69,9 +69,9 @@ $ sudo reboot
 
 General instructions are at http://codex.wordpress.org/Installing_WordPress
 
-Unzip wordpress to /usr/share/nginx/wordpress
+Unzip Wordpress to /usr/share/nginx/wordpress
 
-Change the Nginx config to link to wordpress directory:
+Change the Nginx config to link to Wordpress directory:
 $ sudo vi /etc/nginx/sites-enabled/wordpress
 "root /usr/share/nginx/www" -> "root /usr/share/nginx/wordpress"
 
@@ -83,7 +83,6 @@ $ sudo vi /etc/nginx/sites-enabled/wordpress
 Download the plugin http://wordpress.org/plugins/mysqli/installation/
 
 $ cp mysqli/db.php /usr/share/nginx/wordpress/wp-content/
-
 $ sudo service nginx reload
 
 
@@ -96,9 +95,9 @@ http://codex.wordpress.org/Installing_WordPress#Using_the_MySQL_Client
 $ mysql -u root -p
 mysql> create database wordpress;
 mysql> exit;
-$ sudo chown -R www-data wordpress
+$ sudo chown -R www-data /usr/share/nginx/wordpress
 
-Run URL /wp-admin/install.php
+Run URL /wp-admin/install.php in a browser
 
 
 ###########################
