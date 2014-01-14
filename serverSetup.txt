@@ -1,0 +1,112 @@
+#################
+# Hostname config
+#################
+
+$ sudo vi /etc/hostname
+www.nordiccore.org
+
+$ sudo apt-get update
+$ sudo apt-get upgrade
+
+Check address in "ifconfig"
+
+$ sudo vi /etc/hosts
+172.31.38.234 www.nordiccore.org www #address from “ifconfig”
+
+
+####################################
+# Add missing packages for Wordpress
+####################################
+
+$ sudo apt-get install mysql-client mysql-server nginx php5-fpm php5-mysql zip php5-gd
+
+
+###########################
+# Basic Nginx configuration
+###########################
+
+$ sudo cp /etc/nginx/sites-available/default /etc/nginx/sites-available/wordpress
+$ sudo ln -s /etc/nginx/sites-available/wordpress sites-enabled/wordpress
+$ sudo rm sites-enabled/default
+
+Modify the Nginx config file to enable PHP:
+$ sudo vi /etc/nginx/sites-enabled/wordpress
+
+Modify some lines:
+- "index index.html index.htm;" -> "index index.php index.html index.htm;"
+- "try_files $uri $uri/ /index.html;" -> "try_files $uri $uri/ /index.php /index.html;"
+
+Uncomment some lines:
+    location ~ \.php$ {
+            try_files $uri =404;
+            fastcgi_split_path_info ^(.+\.php)(/.+)$;
+    #       # NOTE: You should have "cgi.fix_pathinfo = 0;" in php.ini
+    #
+    #       # With php5-cgi alone:
+            fastcgi_pass 127.0.0.1:9000;
+    #       # With php5-fpm:
+    #       fastcgi_pass unix:/var/run/php5-fpm.sock;
+            include fastcgi_params;
+            fastcgi_index index.php;
+    }
+    
+Make sure that the port 80 is not blocked by the hosting provider
+
+
+#######################
+# Config MySQLi for PHP
+#######################
+
+$ sudo vi /etc/php5/fpm/php.ini
+Uncomment line "mysqli.allow_local_infile = On"
+
+$ sudo reboot
+
+
+########################
+# Wordpress installation
+########################
+
+General instructions are at http://codex.wordpress.org/Installing_WordPress
+
+Unzip wordpress to /usr/share/nginx/wordpress
+
+Change the Nginx config to link to wordpress directory:
+$ sudo vi /etc/nginx/sites-enabled/wordpress
+"root /usr/share/nginx/www" -> "root /usr/share/nginx/wordpress"
+
+
+###################################
+# Configure Wordpress to use MySQLi 
+###################################
+
+Download the plugin http://wordpress.org/plugins/mysqli/installation/
+
+$ cp mysqli/db.php /usr/share/nginx/wordpress/wp-content/
+
+$ sudo service nginx reload
+
+
+#################
+# Create MySQL DB
+#################
+
+http://codex.wordpress.org/Installing_WordPress#Using_the_MySQL_Client
+
+$ mysql -u root -p
+mysql> create database wordpress;
+mysql> exit;
+$ sudo chown -R www-data wordpress
+
+Run URL /wp-admin/install.php
+
+
+###########################
+# Install Wordpress plugins
+###########################
+
+Disqus Comment System, Facebook, Acurax Social Media Widget
+
+$ unzip <plugin>.zip
+$ sudo mv <plugin> /usr/share/nginx/wordpress/wp-content/plugins/
+$ sudo chown -R www-data /usr/share/nginx/wordpress
